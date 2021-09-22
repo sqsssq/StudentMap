@@ -9,7 +9,6 @@
         html {
             height: 100%;
             display: table;
-            width: 100%;
         }
 
         body {
@@ -24,8 +23,8 @@
     <script>
         // Creating map options
         var mapOptions = {
-            center: [30.2084, 120.21201],
-            zoom: 12
+            center: [17.385044, 78.486671],
+            zoom: 10
         }
         // Creating a map object
         var map = new L.map('map', mapOptions);
@@ -33,11 +32,6 @@
         var layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
         // Adding layer to the map
         map.addLayer(layer);
-
-        // Creating a marker
-        var marker = L.marker([30.321641, 120.394735]);
-        // Adding marker to the map
-        marker.addTo(map);
     </script>
 </body>
 
