@@ -1,6 +1,6 @@
 <!--
  * @Author: Qing Shi
- * @LastEditTime: 2021-10-17 00:49:40
+ * @LastEditTime: 2021-10-17 00:48:37
  * @Knowledge: 
  * @Description: 
  * @Attention: 
@@ -63,11 +63,10 @@
             })
             var mak = new Array();
             list.forEach((d) => {
-                mak.push(L.marker([parseFloat(d.lat), parseFloat(d.lng)]).bindPopup(d.name).addTo(map));
+                mak.push(L.marker([parseFloat(d.lat), parseFloat(d.lng)]).bindPopup(d.name));
             })
             
             console.log(mak);
-            
         });
     </script>
 </body>
