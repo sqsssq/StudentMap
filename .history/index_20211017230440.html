@@ -1,6 +1,6 @@
 <!--
  * @Author: Qing Shi
- * @LastEditTime: 2021-10-17 23:35:33
+ * @LastEditTime: 2021-10-17 23:03:52
  * @Knowledge: 
  * @Description: 
  * @Attention: 
@@ -48,13 +48,12 @@
         // Creating a Layer object
         var layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
         // Adding layer to the map
-        map.addLayer(layer);
+        map.addLayer(layer)
 
-        // Creating a marker
-        // var marker = L.marker([30.2661910,120.1181892]).bindPopup("石青");
-        // Adding marker to the map
+        // // Creating a marker
+        // var marker = L.marker([30.321641, 120.394735]).bindPopup("石青");
+        // // Adding marker to the map
         // marker.addTo(map);
-
         d3.csv("student.csv").then((data) => {
             let list = new Array();
             data.forEach(function (d) {

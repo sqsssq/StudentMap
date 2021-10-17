@@ -1,6 +1,6 @@
 <!--
  * @Author: Qing Shi
- * @LastEditTime: 2021-10-17 23:35:33
+ * @LastEditTime: 2021-10-17 23:29:21
  * @Knowledge: 
  * @Description: 
  * @Attention: 
@@ -51,25 +51,25 @@
         map.addLayer(layer);
 
         // Creating a marker
-        // var marker = L.marker([30.2661910,120.1181892]).bindPopup("石青");
+        var marker = L.marker([30.3229434,120.3898506]).bindPopup("石青");
         // Adding marker to the map
-        // marker.addTo(map);
+        marker.addTo(map);
 
-        d3.csv("student.csv").then((data) => {
-            let list = new Array();
-            data.forEach(function (d) {
-                if (d.lat != '') {
-                    list.push(d);
-                }
-            })
-            var mak = new Array();
-            list.forEach((d) => {
-                mak.push(L.marker([parseFloat(d.lat), parseFloat(d.lng)]).bindPopup(d.name).addTo(map));
-            })
+        // d3.csv("student.csv").then((data) => {
+        //     let list = new Array();
+        //     data.forEach(function (d) {
+        //         if (d.lat != '') {
+        //             list.push(d);
+        //         }
+        //     })
+        //     var mak = new Array();
+        //     list.forEach((d) => {
+        //         mak.push(L.marker([parseFloat(d.lat), parseFloat(d.lng)]).bindPopup(d.name).addTo(map));
+        //     })
             
-            console.log(mak);
+        //     console.log(mak);
             
-        });
+        // });
     </script>
 </body>
 
