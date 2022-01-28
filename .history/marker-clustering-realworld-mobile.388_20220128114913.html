@@ -19,9 +19,10 @@
 
 	<script type="text/javascript">
 
-		// var tiles = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-
-		var tiles = L.tileLayer('https://api.mapbox.com/styles/v1/sqssq/ckyxzywv8003315qfx2c3a2jz/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoic3Fzc3EiLCJhIjoiY2t0dnBpaTVhMG42NDJvbXB3azRxdW85aiJ9.i_XIeypEbuKs4hzz3c76CQ', {
+		var tiles = L.tileLayer('http://t{s}.tianditu.gov.cn/img_w/wmts?tk=密钥&SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TileMatrix={z}&TileCol={x}&TileRow={y}
+————————————————
+版权声明：本文为CSDN博主「程序猿小郑」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/qq_34492913/article/details/104802149', {
 				maxZoom: 20,
 				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Points &copy 2012 LINZ'
 			}),
