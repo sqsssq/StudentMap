@@ -1,46 +1,176 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>Leaflet debug page</title>
 
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ==" crossorigin="" />
-	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet-src.js" integrity="sha512-WXoSHqw/t26DszhdMhOXOkI7qCiv5QWXhH9R7CgvgZMHz1ImlkVQ3uNsiQKu5wwbbxtPzFXd1hK4tzno2VqhpA==" crossorigin=""></script>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"
+		integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=="
+		crossorigin="" />
+	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet-src.js"
+		integrity="sha512-WXoSHqw/t26DszhdMhOXOkI7qCiv5QWXhH9R7CgvgZMHz1ImlkVQ3uNsiQKu5wwbbxtPzFXd1hK4tzno2VqhpA=="
+		crossorigin=""></script>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<link rel="stylesheet" href="mobile.css" />
-
+	<!-- 
 	<link rel="stylesheet" href="/dist/MarkerCluster.css" />
 	<link rel="stylesheet" href="/dist/MarkerCluster.Default.css" />
 	<script src="/dist/leaflet.markercluster-src.js"></script>
-	<script src="realworld.388.js"></script>
+	<script src="realworld.388.js"></script> -->
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
-<body>
 
-	<div id="map"></div>
+<body>
+	<div id="app" style="height: 100vh; width: 100%">
+		<div id="map">
+		</div>
+
+		<svg id="sMap" width="100%" height="100vh" style="position:absolute; top:0px; left:0px;z-index: 10000;">
+			<circle v-for="(item, index) in circle_data" :cx="item[0]" :cy="item[1]" r="2" fill="red"></circle>
+			<rect x="10" y="80" width="35" height="400" fill="white" stroke="black"></rect>
+			<rect v-for="(item, index) in rect_data" x="10" :y="80 + item[0]" :width="35" :height="item[1] - item[0]" fill='blue'></rect>
+			<text x="50" y="85" font-size="15">00:00:00</text>
+			<text x="50" y="485" font-size="15">23:59:59</text>
+			<rect x="10" y="80" width="35" height="400" fill="none" stroke="black"></rect>
+		</svg>
+		<select id="d6" style="width:100px; z-index: 100000;position:absolute; top:12px; left:100px;"
+			v-on:change="draw($event)">
+			<option v-for="(item, index) in time_seq" :value="item">{{ item }}</option>
+		</select>
+		<button v-on:click="creatMap" style="z-index: 100000;position:absolute; top:10px; left:50px;">start</button>
+	</div>
+
+
+
 
 	<script type="text/javascript">
 
 		// var tiles = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
-		var tiles = L.tileLayer('https://api.mapbox.com/styles/v1/sqssq/ckyxzywv8003315qfx2c3a2jz/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoic3Fzc3EiLCJhIjoiY2t0dnBpaTVhMG42NDJvbXB3azRxdW85aiJ9.i_XIeypEbuKs4hzz3c76CQ', {
-				maxZoom: 20,
-				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Points &copy 2012 LINZ'
-			}),
-			latlng = L.latLng(30.182689, 120.176241);
 
-		var map = L.map('map', {center: latlng, zoom: 12, layers: [tiles]});
+		// var markers = L.markerClusterGroup();
 
-		var markers = L.markerClusterGroup();
+		// for (var i = 0; i < addressPoints.length; i++) {
+		// 	var a = addressPoints[i];
+		// 	var title = a[2];
+		// 	var marker = L.marker(L.latLng(a[0], a[1]), { title: title });
+		// 	marker.bindPopup(title);
+		// 	markers.addLayer(marker);
+		// }
 
-		for (var i = 0; i < addressPoints.length; i++) {
-			var a = addressPoints[i];
-			var title = a[2];
-			var marker = L.marker(L.latLng(a[0], a[1]), { title: title });
-			marker.bindPopup(title);
-			markers.addLayer(marker);
-		}
+		// map.addLayer(markers);
+		const { createApp } = Vue
 
-		map.addLayer(markers);
+		createApp({
+			data() {
+				return {
+					message: 'Hello Vue!',
+					map: null,
+					time_seq: [],
+					circle_data: [],
+					rect_data: []
+				}
+			},
+			methods: {
+				creatMap() {
+					console.log(1);
+					// var tiles = L.tileLayer('https://api.mapbox.com/styles/v1/sqssq/ckyxzywv8003315qfx2c3a2jz/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoic3Fzc3EiLCJhIjoiY2t0dnBpaTVhMG42NDJvbXB3azRxdW85aiJ9.i_XIeypEbuKs4hzz3c76CQ', {
+						var tiles = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+					
+						maxZoom: 20,
+						attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Points &copy 2012 LINZ'
+					}),
+						latlng = L.latLng(22.8, 113.94);
+
+					let map = L.map('map', { center: latlng, zoom: 9.5, layers: [tiles] });
+					this.map = map;
+					console.log(map.latLngToLayerPoint([22.51, 113]))
+					let _this = this;
+					d3.json('time_label.json').then(d => {
+						d.sort();
+						d[0] = 'All'
+						d.pop();
+						_this.time_seq = d;
+						_this.drawAll();
+					})
+				},
+				async draw(e) {
+					console.log(e.target.value);
+					let day = e.target.value;
+					if (day == 'All') {
+						this.drawAll();
+						return;
+					}
+					let p_data = await d3.json('pos_per_day.json');
+					let t_data = await d3.json('time_per_day.json');
+					let cir_pos = [];
+					let d = p_data[day]
+					for (let i = 0; i < d.length; ++i) {
+						let td = this.map.latLngToLayerPoint([d[i][1], d[i][0]]);
+						cir_pos.push([td.x, td.y]);
+						// console.log(i, d[i]);
+					}
+					this.circle_data = cir_pos;
+					this.circle_data = (JSON.parse(JSON.stringify(this.circle_data)));
+					console.log(t_data[day])
+					let td = t_data[day];
+					if (td[0][0][0] == '2')
+						td[0][0] = '00:00:00';
+					// console.log(td)
+					let parseTime = d3.timeParse("%H:%M:%S");
+					let scale = d3.scaleLinear([parseTime('00:00:00'), parseTime('23:59:59')], [0, 400]);
+					let r_data = [];
+					for (let i in td) {
+						let ttd = td[i];
+						r_data.push([scale(parseTime(ttd[0])), scale(parseTime(ttd[1]))]);
+					}
+					// console.log(r_data);
+					this.rect_data = r_data;
+				},
+
+				async drawAll() {
+					// console.log(e.target.value);
+					// let day = e.target.value;
+					let p_data = await d3.csv('pos.csv');
+					// let t_data = await d3.json('time_per_day.json');
+					let cir_pos = [];
+					// let d = p_data[day]
+					d = p_data;
+					console.log(d);
+					for (let i = 0; i < d.length; ++i) {
+						let td = this.map.latLngToLayerPoint([d[i].lng, d[i].lat]);
+						cir_pos.push([td.x, td.y]);
+						// console.log(i, d[i]);
+					}
+					console.log(cir_pos)
+					this.circle_data = cir_pos;
+					console.log(JSON.parse(JSON.stringify(this.circle_data)));
+				}
+			}
+		}).mount('#app')
+		// draw();
+
+		// console.log(pos_data)
+		// let da;
+		// pos_data.then(d => {
+		// 	let cir_pos = [];
+		// 	for (let i = 0; i < 1314; ++i) {
+		// 		cir_pos.push(map.latLngToLayerPoint([d[i].lng, d[i].lat]));
+		// 		// console.log(i, d[i]);
+		// 	}
+		// 	d3.select('#sMap').selectAll('#cir')
+		// 	.attr('id', 'cir')
+		// 	.data(cir_pos)
+		// 	.enter()
+		// 	.append('circle')
+		// 	.attr('cx', d => d.x)
+		// 	.attr('cy', d => d.y)
+		// 	.attr('r', 2)
+		// 	.attr('fill', 'white');
+		// })
 
 	</script>
 </body>
+
 </html>
