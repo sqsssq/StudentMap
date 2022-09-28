@@ -5,12 +5,10 @@
 	<title>Leaflet debug page</title>
 
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.1/dist/leaflet.css"
-   integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
-   crossorigin=""/>
-   <!-- Make sure you put this AFTER Leaflet's CSS -->
- <script src="https://unpkg.com/leaflet@1.9.1/dist/leaflet.js"
- integrity="sha256-NDI0K41gVbWqfkkaHj15IzU7PtMoelkzyKp8TOaFQ3s="
- crossorigin=""></script>
+		integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin="" />
+	<!-- Make sure you put this AFTER Leaflet's CSS -->
+	<script src="https://unpkg.com/leaflet@1.9.1/dist/leaflet.js"
+		integrity="sha256-NDI0K41gVbWqfkkaHj15IzU7PtMoelkzyKp8TOaFQ3s=" crossorigin=""></script>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<link rel="stylesheet" href="mobile.css" />
 	<!-- 
@@ -28,8 +26,7 @@
 		</div>
 		<!-- pointer-events: none;  -->
 
-		<svg id="sMap" width="100%" height="100vh"
-			style="position:absolute; top:0px; left:0px;z-index: 10000;">
+		<svg id="sMap" width="100%" height="100vh" style="position:absolute; top:0px; left:0px;z-index: 10000;">
 			<path :d="linePath" fill="none" stroke="gray"></path>
 			<circle v-for="(item, index) in circle_data" :cx="item[0]" :cy="item[1]" r="2" :fill="item[2]" stroke="gray"
 				stroke-width="0.5"></circle>
@@ -240,11 +237,11 @@
 
 				async drawRoute(e) {
 					this.sig = 1;
-					console.log(e.target.value);
+					// console.log(e.target.value);
 					let route = e.target.value;
 					// this.current_day = day;
 					if (route == 'All') {
-						this.draw(this.current_day);
+						this.draw({ target: { value: this.current_day } });
 						return;
 					}
 					let kdata = await d3.json('data_process/data_per_day/' + this.current_day + '.json');
