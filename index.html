@@ -29,7 +29,7 @@
 		<svg id="sMap" width="100%" height="100vh" style="position:absolute; top:0px; left:0px;z-index: 10000;">
 			<circle v-for="(item, index) in circle_data" :cx="item[0]" :cy="item[1]" r="2" fill="red"></circle>
 			<rect x="10" y="80" width="35" height="400" fill="white" stroke="black"></rect>
-			<rect v-for="(item, index) in rect_data" x="10" :y="80 + item[0]" :width="35" :height="item[1] - item[0]" fill='blue'></rect>
+			<rect v-for="(item, index) in rect_data" x="10" :y="80 + item[0]" :width="35" :height="item[1] - item[0]" fill='blue' fill-opacity="0.3"></rect>
 			<text x="50" y="85" font-size="15">00:00:00</text>
 			<text x="50" y="485" font-size="15">23:59:59</text>
 			<rect x="10" y="80" width="35" height="400" fill="none" stroke="black"></rect>
@@ -37,6 +37,10 @@
 		<select id="d6" style="width:100px; z-index: 100000;position:absolute; top:12px; left:100px;"
 			v-on:change="draw($event)">
 			<option v-for="(item, index) in time_seq" :value="item">{{ item }}</option>
+		</select>
+		<select id="d7" style="width:100px; z-index: 100000;position:absolute; top:12px; left:250px;"
+			v-on:change="drawRoute($event)">
+			<option v-for="(item, index) in route_data" :value="item">{{ item }}</option>
 		</select>
 		<button v-on:click="creatMap" style="z-index: 100000;position:absolute; top:10px; left:50px;">start</button>
 	</div>
@@ -69,7 +73,9 @@
 					map: null,
 					time_seq: [],
 					circle_data: [],
-					rect_data: []
+					rect_data: [],
+					route_data: [],
+					current_day: null
 				}
 			},
 			methods: {
@@ -87,7 +93,7 @@
 					this.map = map;
 					console.log(map.latLngToLayerPoint([22.51, 113]))
 					let _this = this;
-					d3.json('time_label.json').then(d => {
+					d3.json('data_process/time_label.json').then(d => {
 						d.sort();
 						d[0] = 'All'
 						d.pop();
@@ -95,29 +101,127 @@
 						_this.drawAll();
 					})
 				},
+				// async draw(e) {
+				// 	console.log(e.target.value);
+				// 	let day = e.target.value;
+				// 	if (day == 'All') {
+				// 		this.drawAll();
+				// 		return;
+				// 	}
+				// 	let p_data = await d3.json('pos_per_day.json');
+				// 	let t_data = await d3.json('time_per_day.json');
+				// 	let cir_pos = [];
+				// 	let d = p_data[day]
+				// 	for (let i = 0; i < d.length; ++i) {
+				// 		let td = this.map.latLngToLayerPoint([d[i][1], d[i][0]]);
+				// 		cir_pos.push([td.x, td.y]);
+				// 		// console.log(i, d[i]);
+				// 	}
+				// 	this.circle_data = cir_pos;
+				// 	this.circle_data = (JSON.parse(JSON.stringify(this.circle_data)));
+				// 	console.log(t_data[day])
+				// 	let td = t_data[day];
+				// 	if (td[0][0][0] == '2')
+				// 		td[0][0] = '00:00:00';
+				// 	// console.log(td)
+				// 	let parseTime = d3.timeParse("%H:%M:%S");
+				// 	let scale = d3.scaleLinear([parseTime('00:00:00'), parseTime('23:59:59')], [0, 400]);
+				// 	let r_data = [];
+				// 	for (let i in td) {
+				// 		let ttd = td[i];
+				// 		r_data.push([scale(parseTime(ttd[0])), scale(parseTime(ttd[1]))]);
+				// 	}
+				// 	// console.log(r_data);
+				// 	this.rect_data = r_data;
+				// },
+
+				
 				async draw(e) {
 					console.log(e.target.value);
 					let day = e.target.value;
+					this.current_day = day;
 					if (day == 'All') {
 						this.drawAll();
 						return;
 					}
-					let p_data = await d3.json('pos_per_day.json');
-					let t_data = await d3.json('time_per_day.json');
+					let kdata = await d3.json('data_process/data_per_day/' + day + '.json');
+					let p_n_data = [];
+					let t_n_data = []
+					let r_n_data = ['All']
+					for (let i in kdata) {
+						// console.log(kdata[i]);
+						p_n_data = p_n_data.concat(kdata[i]);
+						r_n_data.push(i);
+						t_n_data.push([kdata[i][0].time, kdata[i][kdata[i].length - 1].time]);
+					}
+					this.route_data = r_n_data;
+					// console.log(kdata, p_n_data)
+					// let p_data = await d3.json('data_process/pos_per_day.json');
+					// let t_data = await d3.json('time_per_day.json');
 					let cir_pos = [];
-					let d = p_data[day]
+					// let d = p_data[day]
+					let d = p_n_data;
 					for (let i = 0; i < d.length; ++i) {
-						let td = this.map.latLngToLayerPoint([d[i][1], d[i][0]]);
+						let td = this.map.latLngToLayerPoint([d[i].pos[1], d[i].pos[0]]);
 						cir_pos.push([td.x, td.y]);
 						// console.log(i, d[i]);
 					}
 					this.circle_data = cir_pos;
 					this.circle_data = (JSON.parse(JSON.stringify(this.circle_data)));
-					console.log(t_data[day])
-					let td = t_data[day];
-					if (td[0][0][0] == '2')
-						td[0][0] = '00:00:00';
-					// console.log(td)
+					// console.log(t_data[day])
+					// let td = t_data[day];
+					let td = t_n_data;
+					// if (td[0][0][0] == '2')
+					// 	td[0][0] = '00:00:00';
+					console.log(td)
+					let parseTime = d3.timeParse("%H:%M:%S");
+					let scale = d3.scaleLinear([parseTime('00:00:00'), parseTime('23:59:59')], [0, 400]);
+					let r_data = [];
+					for (let i in td) {
+						let ttd = td[i];
+						r_data.push([scale(parseTime(ttd[0])), scale(parseTime(ttd[1]))]);
+					}
+					// console.log(r_data);
+					this.rect_data = r_data;
+				},
+
+				async drawRoute(e) {
+					console.log(e.target.value);
+					let route = e.target.value;
+					// this.current_day = day;
+					if (route == 'All') {
+						this.draw(this.current_day);
+						return;
+					}
+					let kdata = await d3.json('data_process/data_per_day/' + this.current_day + '.json');
+					let p_n_data = [];
+					let t_n_data = []
+					// for (let i in kdata) {
+						// console.log(kdata[i]);
+						p_n_data = p_n_data.concat(kdata[route]);
+						// r_n_data.push(i);
+						t_n_data.push([kdata[route][0].time, kdata[route][kdata[route].length - 1].time]);
+					// }
+					// this.route_data = r_n_data;
+					console.log(p_n_data)
+					// let p_data = await d3.json('data_process/pos_per_day.json');
+					// let t_data = await d3.json('time_per_day.json');
+					let cir_pos = [];
+					// let d = p_data[day]
+					let d = p_n_data;
+					for (let i = 0; i < d.length; ++i) {
+						let td = this.map.latLngToLayerPoint([d[i].pos[1], d[i].pos[0]]);
+						cir_pos.push([td.x, td.y]);
+						// console.log(i, d[i]);
+					}
+					this.circle_data = cir_pos;
+					this.circle_data = (JSON.parse(JSON.stringify(this.circle_data)));
+					// console.log(t_data[day])
+					// let td = t_data[day];
+					let td = t_n_data;
+					// if (td[0][0][0] == '2')
+					// 	td[0][0] = '00:00:00';
+					console.log(td)
 					let parseTime = d3.timeParse("%H:%M:%S");
 					let scale = d3.scaleLinear([parseTime('00:00:00'), parseTime('23:59:59')], [0, 400]);
 					let r_data = [];
@@ -137,38 +241,19 @@
 					let cir_pos = [];
 					// let d = p_data[day]
 					d = p_data;
-					console.log(d);
+					// console.log(d);
 					for (let i = 0; i < d.length; ++i) {
 						let td = this.map.latLngToLayerPoint([d[i].lng, d[i].lat]);
 						cir_pos.push([td.x, td.y]);
 						// console.log(i, d[i]);
 					}
-					console.log(cir_pos)
+					// console.log(cir_pos)
 					this.circle_data = cir_pos;
-					console.log(JSON.parse(JSON.stringify(this.circle_data)));
-				}
-			}
-		}).mount('#app')
-		// draw();
+					// console.log(JSON.parse(JSON.stringify(this.circle_data)));
+				},
 
-		// console.log(pos_data)
-		// let da;
-		// pos_data.then(d => {
-		// 	let cir_pos = [];
-		// 	for (let i = 0; i < 1314; ++i) {
-		// 		cir_pos.push(map.latLngToLayerPoint([d[i].lng, d[i].lat]));
-		// 		// console.log(i, d[i]);
-		// 	}
-		// 	d3.select('#sMap').selectAll('#cir')
-		// 	.attr('id', 'cir')
-		// 	.data(cir_pos)
-		// 	.enter()
-		// 	.append('circle')
-		// 	.attr('cx', d => d.x)
-		// 	.attr('cy', d => d.y)
-		// 	.attr('r', 2)
-		// 	.attr('fill', 'white');
-		// })
+			}
+		}).mount('#app');
 
 	</script>
 </body>
