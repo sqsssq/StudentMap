@@ -4,12 +4,13 @@
 <head>
 	<title>Leaflet debug page</title>
 
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"
-		integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=="
-		crossorigin="" />
-	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet-src.js"
-		integrity="sha512-WXoSHqw/t26DszhdMhOXOkI7qCiv5QWXhH9R7CgvgZMHz1ImlkVQ3uNsiQKu5wwbbxtPzFXd1hK4tzno2VqhpA=="
-		crossorigin=""></script>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.1/dist/leaflet.css"
+   integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
+   crossorigin=""/>
+   <!-- Make sure you put this AFTER Leaflet's CSS -->
+ <script src="https://unpkg.com/leaflet@1.9.1/dist/leaflet.js"
+ integrity="sha256-NDI0K41gVbWqfkkaHj15IzU7PtMoelkzyKp8TOaFQ3s="
+ crossorigin=""></script>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<link rel="stylesheet" href="mobile.css" />
 	<!-- 
@@ -25,11 +26,16 @@
 	<div id="app" style="height: 100vh; width: 100%">
 		<div id="map">
 		</div>
+		<!-- pointer-events: none;  -->
 
-		<svg id="sMap" width="100%" height="100vh" style="position:absolute; top:0px; left:0px;z-index: 10000;">
-			<circle v-for="(item, index) in circle_data" :cx="item[0]" :cy="item[1]" r="2" fill="red"></circle>
+		<svg id="sMap" width="100%" height="100vh"
+			style="position:absolute; top:0px; left:0px;z-index: 10000;">
+			<path :d="linePath" fill="none" stroke="gray"></path>
+			<circle v-for="(item, index) in circle_data" :cx="item[0]" :cy="item[1]" r="2" :fill="item[2]" stroke="gray"
+				stroke-width="0.5"></circle>
 			<rect x="10" y="80" width="35" height="400" fill="white" stroke="black"></rect>
-			<rect v-for="(item, index) in rect_data" x="10" :y="80 + item[0]" :width="35" :height="item[1] - item[0]" fill='blue' fill-opacity="0.3"></rect>
+			<rect v-for="(item, index) in rect_data" x="10" :y="80 + item[0]" :width="35" :height="item[1] - item[0]"
+				fill='blue' fill-opacity="0.3"></rect>
 			<text x="50" y="85" font-size="15">00:00:00</text>
 			<text x="50" y="485" font-size="15">23:59:59</text>
 			<rect x="10" y="80" width="35" height="400" fill="none" stroke="black"></rect>
@@ -44,9 +50,6 @@
 		</select>
 		<button v-on:click="creatMap" style="z-index: 100000;position:absolute; top:10px; left:50px;">start</button>
 	</div>
-
-
-
 
 	<script type="text/javascript">
 
@@ -75,22 +78,49 @@
 					circle_data: [],
 					rect_data: [],
 					route_data: [],
-					current_day: null
+					current_day: null,
+					linePath: null,
+					origin_data: [],
+					sig: 0
 				}
 			},
 			methods: {
 				creatMap() {
 					console.log(1);
 					// var tiles = L.tileLayer('https://api.mapbox.com/styles/v1/sqssq/ckyxzywv8003315qfx2c3a2jz/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoic3Fzc3EiLCJhIjoiY2t0dnBpaTVhMG42NDJvbXB3azRxdW85aiJ9.i_XIeypEbuKs4hzz3c76CQ', {
-						var tiles = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-					
-						maxZoom: 20,
-						attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Points &copy 2012 LINZ'
-					}),
-						latlng = L.latLng(22.8, 113.94);
+					// var tiles = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 
-					let map = L.map('map', { center: latlng, zoom: 9.5, layers: [tiles] });
+					// 	maxZoom: 20,
+					// 	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Points &copy 2012 LINZ'
+					// }),
+					// 	latlng = L.latLng(22.8, 113.94);
+
+					// let map = L.map('map', { center: latlng, zoom: 9.5, layers: [tiles] });
+
+					let map = L.map('map', {
+						center: [22.8, 113.94],
+						zoom: 9.5, //缩放比例
+						maxZoom: 20,
+						minZoom: 10,
+						zoomControl: true, //+ - 按钮
+						doubleClickZoom: true, //双击放大
+						attributionControl: true, // 右下角leaflet标识
+					})
+
+					//引入图层,可以引入多个图层
+					L.tileLayer(
+						'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+					).addTo(map)
 					this.map = map;
+					this.map.on('dragend', (e) => {
+
+						//获取当前放大或者缩小的等级
+						let zscale = e.target.getZoom();
+						this.updateDraw();
+					})
+					map.on('zoom', () => {
+						this.updateDraw();
+					})
 					console.log(map.latLngToLayerPoint([22.51, 113]))
 					let _this = this;
 					d3.json('data_process/time_label.json').then(d => {
@@ -134,9 +164,30 @@
 				// 	// console.log(r_data);
 				// 	this.rect_data = r_data;
 				// },
+				updateDraw() {
+					console.log(1)
+					let cir_pos = [];
+					// let d = p_data[day]
+					let d = this.origin_data;
+					for (let i = 0; i < d.length; ++i) {
+						let td = this.map.latLngToLayerPoint([d[i][0], d[i][1]]);
+						cir_pos.push([td.x, td.y, d[i][2]]);
+						// origin_data.push([d[i].pos[1], d[i].pos[0], 'red'])
+						// console.log(i, d[i]);
+					}
+					this.circle_data = cir_pos;
+					if (this.sig == 1) {
+						let line = d3.line()
+							.x(d => d[0])
+							.y(d => d[1]);
+						this.linePath = line(cir_pos);
+					}
+				},
 
-				
+
 				async draw(e) {
+					this.sig = 0;
+					this.linePath = null;
 					console.log(e.target.value);
 					let day = e.target.value;
 					this.current_day = day;
@@ -159,11 +210,13 @@
 					// let p_data = await d3.json('data_process/pos_per_day.json');
 					// let t_data = await d3.json('time_per_day.json');
 					let cir_pos = [];
+					let origin_data = []
 					// let d = p_data[day]
 					let d = p_n_data;
 					for (let i = 0; i < d.length; ++i) {
 						let td = this.map.latLngToLayerPoint([d[i].pos[1], d[i].pos[0]]);
-						cir_pos.push([td.x, td.y]);
+						cir_pos.push([td.x, td.y, 'red']);
+						origin_data.push([d[i].pos[1], d[i].pos[0], 'red'])
 						// console.log(i, d[i]);
 					}
 					this.circle_data = cir_pos;
@@ -186,6 +239,7 @@
 				},
 
 				async drawRoute(e) {
+					this.sig = 1;
 					console.log(e.target.value);
 					let route = e.target.value;
 					// this.current_day = day;
@@ -195,25 +249,41 @@
 					}
 					let kdata = await d3.json('data_process/data_per_day/' + this.current_day + '.json');
 					let p_n_data = [];
-					let t_n_data = []
+					let t_n_data = [];
 					// for (let i in kdata) {
-						// console.log(kdata[i]);
-						p_n_data = p_n_data.concat(kdata[route]);
-						// r_n_data.push(i);
-						t_n_data.push([kdata[route][0].time, kdata[route][kdata[route].length - 1].time]);
+					// console.log(kdata[i]);
+					p_n_data = p_n_data.concat(kdata[route]);
+					// r_n_data.push(i);
+					t_n_data.push([kdata[route][0].time, kdata[route][kdata[route].length - 1].time]);
 					// }
 					// this.route_data = r_n_data;
-					console.log(p_n_data)
+					// console.log(p_n_data)
 					// let p_data = await d3.json('data_process/pos_per_day.json');
 					// let t_data = await d3.json('time_per_day.json');
 					let cir_pos = [];
+					let origin_data = []
 					// let d = p_data[day]
 					let d = p_n_data;
+					let maxValue = -1;
 					for (let i = 0; i < d.length; ++i) {
-						let td = this.map.latLngToLayerPoint([d[i].pos[1], d[i].pos[0]]);
-						cir_pos.push([td.x, td.y]);
+						maxValue = Math.max(maxValue, d[i].voc);
 						// console.log(i, d[i]);
 					}
+					let computeColor = d3.scaleLinear([0, maxValue], [1, 0]);
+					for (let i = 0; i < d.length; ++i) {
+						let td = this.map.latLngToLayerPoint([d[i].pos[1], d[i].pos[0]]);
+						let col = 'black';
+						if (maxValue != -1)
+							col = d3.interpolateViridis(computeColor(d[i].voc))
+						cir_pos.push([td.x, td.y, col]);
+						origin_data.push([d[i].pos[1], d[i].pos[0], col])
+						// console.log(i, d[i]);
+					}
+					let line = d3.line()
+						.x(d => d[0])
+						.y(d => d[1])
+					this.origin_data = origin_data;
+					this.linePath = line(cir_pos)
 					this.circle_data = cir_pos;
 					this.circle_data = (JSON.parse(JSON.stringify(this.circle_data)));
 					// console.log(t_data[day])
@@ -221,7 +291,8 @@
 					let td = t_n_data;
 					// if (td[0][0][0] == '2')
 					// 	td[0][0] = '00:00:00';
-					console.log(td)
+					// console.log(td)
+
 					let parseTime = d3.timeParse("%H:%M:%S");
 					let scale = d3.scaleLinear([parseTime('00:00:00'), parseTime('23:59:59')], [0, 400]);
 					let r_data = [];
@@ -234,19 +305,24 @@
 				},
 
 				async drawAll() {
+					this.linePath = null;
+					this.sig = 0;
 					// console.log(e.target.value);
 					// let day = e.target.value;
 					let p_data = await d3.csv('pos.csv');
 					// let t_data = await d3.json('time_per_day.json');
 					let cir_pos = [];
+					let origin_data = []
 					// let d = p_data[day]
 					d = p_data;
 					// console.log(d);
 					for (let i = 0; i < d.length; ++i) {
 						let td = this.map.latLngToLayerPoint([d[i].lng, d[i].lat]);
-						cir_pos.push([td.x, td.y]);
+						origin_data.push([d[i].lng, d[i].lat, 'red']);
+						cir_pos.push([td.x, td.y, 'red']);
 						// console.log(i, d[i]);
 					}
+					this.origin_data = origin_data;
 					// console.log(cir_pos)
 					this.circle_data = cir_pos;
 					// console.log(JSON.parse(JSON.stringify(this.circle_data)));
